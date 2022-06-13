@@ -1,0 +1,26 @@
+import "http"
+import "strings"
+import "json"
+
+param token 
+
+req = http.request("https://management.azure.com/providers/Microsoft.Web/functionAppStacks?api-version=2021-02-01").with_header("Authorization", "Bearer "+token)
+
+stacks = json.unmarshal(http.get(req).body)
+runtimeVersions = []
+
+for stacks.value as _, stack {
+		for stack.properties.majorVersions as _, major {
+			for major.minorVersions as _, minor {
+        case {
+        	when minor.stackSettings.linuxRuntimeSettings.siteConfigPropertiesDictionary.linuxFxVersion is not "":
+         	 append(runtimeVersions, minor.stackSettings.linuxRuntimeSettings.siteConfigPropertiesDictionary.linuxFxVersion)
+        	else:
+        }
+      }
+   }
+}
+
+main = rule { 
+  runtimeVersions contains "Node|10"
+}
